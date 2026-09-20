@@ -27,6 +27,16 @@ sealed class MediaViewerPage(
             1000L + FadeEndLivePhotoViewerPage.FADE_DURATION_MS
         private const val THUMBNAIL_SIZE_PX = 500
 
+        /**
+         * Size of the preview shown immediately when progressive loading is on.
+         * Small enough to arrive fast, yet aspect-correct unlike the thumbnails.
+         */
+        private const val PROGRESSIVE_PREVIEW_SIZE_PX = 720
+
+        /**
+         * @param progressiveImageLoading non-null to show a small preview immediately
+         * and load the high resolution one on demand.
+         */
         fun fromGalleryMedia(
             source: GalleryMedia,
             imageViewSize: Size,
@@ -34,26 +44,20 @@ sealed class MediaViewerPage(
             borderlessVideo: Boolean,
             canOpenPanoramas: Boolean,
             previewUrlFactory: MediaPreviewUrlFactory,
+            progressiveImageLoading: ProgressiveImageLoading? = null,
+            thumbnailSizePx: Int = THUMBNAIL_SIZE_PX,
         ): MediaViewerPage {
             return when {
                 source.media is GalleryMedia.TypeData.Live
                         && source.media.fullDurationMs != null -> {
 
                     if (livePhotosAsImages) {
-                        return ImageViewerPage(
-                            previewUrl = previewUrlFactory.getImagePreviewUrl(
-                                previewHash = source.hash,
-                                sizePx = max(
-                                    imageViewSize.width,
-                                    imageViewSize.height
-                                )
-                            ),
-                            imageViewSize = imageViewSize,
-                            thumbnailUrl = previewUrlFactory.getThumbnailUrl(
-                                thumbnailHash = source.hash,
-                                sizePx = THUMBNAIL_SIZE_PX,
-                            ),
+                        return imageViewerPage(
                             source = source,
+                            imageViewSize = imageViewSize,
+                            previewUrlFactory = previewUrlFactory,
+                            progressiveImageLoading = progressiveImageLoading,
+                            thumbnailSizePx = thumbnailSizePx,
                         )
                     }
 
@@ -143,26 +147,53 @@ sealed class MediaViewerPage(
                     )
 
                 source.media is Viewable.AsImage ->
-                    ImageViewerPage(
-                        previewUrl = previewUrlFactory.getImagePreviewUrl(
-                            previewHash = source.hash,
-                            sizePx = max(
-                                imageViewSize.width,
-                                imageViewSize.height
-                            )
-                        ),
-                        imageViewSize = imageViewSize,
-                        thumbnailUrl = previewUrlFactory.getThumbnailUrl(
-                            thumbnailHash = source.hash,
-                            sizePx = THUMBNAIL_SIZE_PX,
-                        ),
+                    imageViewerPage(
                         source = source,
+                        imageViewSize = imageViewSize,
+                        previewUrlFactory = previewUrlFactory,
+                        progressiveImageLoading = progressiveImageLoading,
+                        thumbnailSizePx = thumbnailSizePx,
                     )
 
                 else ->
                     unsupported(source, previewUrlFactory)
             }
         }
+
+        private fun imageViewerPage(
+            source: GalleryMedia,
+            imageViewSize: Size,
+            previewUrlFactory: MediaPreviewUrlFactory,
+            progressiveImageLoading: ProgressiveImageLoading?,
+            thumbnailSizePx: Int,
+        ) = ImageViewerPage(
+            previewUrl = previewUrlFactory.getImagePreviewUrl(
+                previewHash = source.hash,
+                sizePx =
+                    if (progressiveImageLoading != null)
+                        PROGRESSIVE_PREVIEW_SIZE_PX
+                    else
+                        max(
+                            imageViewSize.width,
+                            imageViewSize.height
+                        )
+            ),
+            hdPreviewUrl = progressiveImageLoading?.let { progressive ->
+                previewUrlFactory.getImagePreviewUrl(
+                    previewHash = source.hash,
+                    sizePx = progressive.hdSizePx,
+                )
+            },
+            isHdLoadedAutomatically = progressiveImageLoading?.isAutomatic == true,
+            imageViewSize = imageViewSize,
+            // The thumbnail of the very size the grid loads is shown as a backdrop,
+            // so it must be requested with the very same size to hit the cache.
+            thumbnailUrl = previewUrlFactory.getThumbnailUrl(
+                thumbnailHash = source.hash,
+                sizePx = thumbnailSizePx,
+            ),
+            source = source,
+        )
 
         fun unsupported(
             source: GalleryMedia,
@@ -177,4 +208,13 @@ sealed class MediaViewerPage(
             source = source,
         )
     }
+
+    /**
+     * @param hdSizePx size of the high resolution preview to be loaded on demand.
+     * @param isAutomatic whether to load it without waiting for the user action.
+     */
+    class ProgressiveImageLoading(
+        val hdSizePx: Int,
+        val isAutomatic: Boolean,
+    )
 }

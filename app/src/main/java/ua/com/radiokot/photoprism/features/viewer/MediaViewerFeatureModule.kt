@@ -23,6 +23,7 @@ import ua.com.radiokot.photoprism.features.viewer.logic.VideoPlayerFactory
 import ua.com.radiokot.photoprism.features.viewer.view.model.GalleryMediaViewerViewModel
 import ua.com.radiokot.photoprism.features.viewer.view.model.VideoPlayerCacheViewModel
 import ua.com.radiokot.photoprism.util.CacheConstraints
+import ua.com.radiokot.photoprism.util.MeteredConnectionChecker
 import java.io.File
 
 @OptIn(UnstableApi::class)
@@ -41,6 +42,12 @@ val mediaViewerFeatureModule = module {
             StandaloneDatabaseProvider(get())
         )
     } bind Cache::class
+
+    single {
+        MeteredConnectionChecker(
+            context = get(),
+        )
+    }
 
     scope<EnvSession> {
         viewModelOf(::GalleryMediaViewerViewModel)

@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/pager_item_media_viewer_image"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="false">
+
+    <!-- Instantly shown cropped thumbnail, which is likely to be cached.
+         It is only a backdrop: tile_ previews are square crops,
+         so they can't be zoomed as the actual content. -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/backdrop_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no"
+        android:scaleType="centerCrop" />
 
     <com.github.chrisbanes.photoview.PhotoView
         android:id="@+id/photo_view"
@@ -17,6 +29,38 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:indeterminate="true" />
+
+    <!-- Margins are programmatically extended with insets -->
+    <FrameLayout
+        android:id="@+id/hd_button_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:layout_marginEnd="16dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/hd_button"
+            style="?materialIconButtonFilledTonalStyle"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="@string/load_hd"
+            android:tooltipText="@string/load_hd"
+            app:icon="@drawable/ic_hd"
+            tools:targetApi="o" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/hd_button_progress"
+            style="@style/Widget.Material3.CircularProgressIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:trackThickness="2dp"
+            tools:visibility="visible" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/error_text_view"

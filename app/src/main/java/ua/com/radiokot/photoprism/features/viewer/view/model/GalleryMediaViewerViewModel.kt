@@ -28,6 +28,7 @@ import ua.com.radiokot.photoprism.features.gallery.view.model.GalleryMediaRemote
 import ua.com.radiokot.photoprism.features.gallery.view.model.GalleryMediaRemoteActionsViewModelDelegate
 import ua.com.radiokot.photoprism.features.viewer.logic.BackgroundMediaFileDownloadManager
 import ua.com.radiokot.photoprism.util.LocalDate
+import ua.com.radiokot.photoprism.util.MeteredConnectionChecker
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -39,6 +40,7 @@ class GalleryMediaViewerViewModel(
     private val webUrlFactory: MediaWebUrlFactory,
     private val previewUrlFactory: MediaPreviewUrlFactory,
     private val featureFlags: FeatureFlags,
+    private val meteredConnectionChecker: MeteredConnectionChecker,
 ) : ViewModel(),
     GalleryMediaDownloadActionsViewModel by galleryMediaDownloadActionsViewModel,
     GalleryMediaRemoteActionsViewModel by galleryMediaRemoteActionsViewModel {
@@ -197,6 +199,14 @@ class GalleryMediaViewerViewModel(
 
         val canOpenPanoramas = featureFlags.hasPanorama3DViewer
 
+        // The HD preview is only loaded automatically
+        // if it is not going to eat the user's mobile traffic.
+        val progressiveImageLoading = MediaViewerPage.ProgressiveImageLoading(
+            hdSizePx = galleryPreferences.hdPreviewSize.value!!.sizePx,
+            isAutomatic = galleryPreferences.autoLoadHdOnUnmetered.value!!
+                    && !meteredConnectionChecker.isConnectionMetered,
+        )
+
         itemsList.value = galleryMediaRepository
             .itemsList
             .map { galleryMedia ->
@@ -210,6 +220,8 @@ class GalleryMediaViewerViewModel(
                         borderlessVideo = isVideoBorderless,
                         canOpenPanoramas = canOpenPanoramas,
                         previewUrlFactory = previewUrlFactory,
+                        progressiveImageLoading = progressiveImageLoading,
+                        thumbnailSizePx = galleryPreferences.itemScale.value!!.thumbnailSizePx,
                     )
             }
             .also {

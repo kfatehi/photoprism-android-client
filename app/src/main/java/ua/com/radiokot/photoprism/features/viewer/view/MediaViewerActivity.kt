@@ -261,6 +261,8 @@ class MediaViewerActivity : BaseActivity() {
                         setUpVideoViewer(viewHolder)
                     } else if (viewHolder is Panorama2DPreviewViewerPage.ViewHolder) {
                         setUpPanoramaPreview(viewHolder)
+                    } else if (viewHolder is ImageViewerPage.ViewHolder) {
+                        setUpProgressiveImage(viewHolder)
                     }
 
                     return null
@@ -702,6 +704,19 @@ class MediaViewerActivity : BaseActivity() {
 
         viewHolder.playerControlsLayout?.borderlessVideoButton?.setOnClickListener {
             viewModel.onBorderlessVideoToggleClicked()
+        }
+    }
+
+    private fun setUpProgressiveImage(viewHolder: ImageViewerPage.ViewHolder) {
+        viewHolder.itemView.doOnPreDraw {
+            viewHolder.applyHdButtonInsets(
+                FullscreenInsetsCompat.barsAndCutout(window.decorView)
+            )
+        }
+
+        // The HD button is a part of the controls, hence it follows their visibility.
+        viewModel.areBottomControlsVisible.observe(this@MediaViewerActivity) { areBottomControlsVisible ->
+            viewHolder.setHdButtonVisibilityAllowed(areBottomControlsVisible)
         }
     }
 

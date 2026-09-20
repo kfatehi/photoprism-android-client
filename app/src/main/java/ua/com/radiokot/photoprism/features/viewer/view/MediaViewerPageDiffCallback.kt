@@ -25,6 +25,9 @@ class MediaViewerPageDiffCallback : DiffCallback<MediaViewerPage> {
         oldItem is ImageViewerPage
                 && newItem is ImageViewerPage ->
             oldItem.imageViewSize == newItem.imageViewSize
+                    && oldItem.previewUrl == newItem.previewUrl
+                    && oldItem.hdPreviewUrl == newItem.hdPreviewUrl
+                    && oldItem.isHdLoadedAutomatically == newItem.isHdLoadedAutomatically
 
         oldItem is FadeEndLivePhotoViewerPage
                 && newItem is FadeEndLivePhotoViewerPage ->
