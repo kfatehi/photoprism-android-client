@@ -179,11 +179,13 @@ val envModule = module {
             }
         } bind HttpClient::class
 
-        scoped {
+        // Exposed separately from Picasso, so that in-flight image requests
+        // can be cancelled by URL.
+        scoped<HttpClient>(named(IMAGE_HTTP_CLIENT)) {
             val session = get<EnvSession>()
 
             val cacheDir: File = get(named(IMAGE_CACHE_DIRECTORY))
-            val httpClient = get<HttpClient>(_q<EnvHttpClientParams>()) {
+            get<HttpClient>(_q<EnvHttpClientParams>()) {
                 EnvHttpClientParams(
                     sessionAwareness = null,
                     clientCertificateAlias = session.envConnectionParams.clientCertificateAlias,
@@ -192,6 +194,10 @@ val envModule = module {
                     cache = Cache(cacheDir, CacheConstraints.getOptimalSize(cacheDir))
                 )
             }
+        }
+
+        scoped {
+            val httpClient = get<HttpClient>(named(IMAGE_HTTP_CLIENT))
 
             // Note: Cache only works properly if there are no redirects in the library URL.
             // For example, https://try.photoprism.app redirects to https://demo.photoprism.app

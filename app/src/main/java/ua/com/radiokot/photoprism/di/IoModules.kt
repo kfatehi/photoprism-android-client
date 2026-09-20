@@ -41,6 +41,7 @@ const val INTERNAL_EXPORT_DIRECTORY = "internal-export"
 const val VIDEO_CACHE_DIRECTORY = "video-cache"
 const val IMAGE_CACHE_DIRECTORY = "image-cache"
 const val MAP_CACHE_DIRECTORY = "map-cache"
+const val IMAGE_HTTP_CLIENT = "image-http-client"
 const val APP_NO_BACKUP_PREFERENCES = "app-no-backup-preferences"
 
 val ioModules: List<Module> = listOf(
