@@ -221,7 +221,6 @@ class GalleryMediaViewerViewModel(
                         canOpenPanoramas = canOpenPanoramas,
                         previewUrlFactory = previewUrlFactory,
                         progressiveImageLoading = progressiveImageLoading,
-                        thumbnailSizePx = galleryPreferences.itemScale.value!!.thumbnailSizePx,
                     )
             }
             .also {

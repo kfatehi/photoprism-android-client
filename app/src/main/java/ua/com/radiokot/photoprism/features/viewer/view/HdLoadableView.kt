@@ -1,7 +1,5 @@
 package ua.com.radiokot.photoprism.features.viewer.view
 
-import android.graphics.Rect
-
 /**
  * A view which initially shows a lightweight preview
  * and can load a high resolution one on demand,
@@ -15,8 +13,11 @@ interface HdLoadableView {
     fun setHdButtonVisibilityAllowed(isAllowed: Boolean)
 
     /**
-     * Extends the HD button margins with the given fullscreen insets.
-     * May be called multiple times with the same value.
+     * Places the HD button, which must be kept away
+     * from the toolbar and the system bars.
      */
-    fun applyHdButtonInsets(insets: Rect)
+    fun setHdButtonMargins(
+        topPx: Int,
+        endPx: Int,
+    )
 }

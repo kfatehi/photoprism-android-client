@@ -2,7 +2,6 @@ package ua.com.radiokot.photoprism.features.viewer.view.model
 
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.util.Size
 import android.view.View
@@ -80,7 +79,6 @@ class ImageViewerPage(
         private var hdPreviewUrl: String? = null
         private var hdLoadState: HdLoadState = HdLoadState.UNAVAILABLE
         private var isHdButtonVisibilityAllowed = true
-        private var appliedHdButtonInsets: Rect? = null
 
         /**
          * Picasso only keeps a weak reference to the target,
@@ -94,9 +92,6 @@ class ImageViewerPage(
         private val imageLoadingCallback = object : Callback {
             override fun onSuccess() {
                 view.progressIndicator.hide()
-                // The preview has the correct aspect ratio,
-                // so the cropped backdrop is no longer needed.
-                view.backdropImageView.isVisible = false
                 isLoadingFinished = true
                 onContentPresented()
             }
@@ -144,18 +139,6 @@ class ImageViewerPage(
                     HdLoadState.IDLE,
                 animateButton = false,
             )
-
-            // The cropped thumbnail is likely to be cached by the gallery grid,
-            // hence it is shown without a network wait while the preview is loading.
-            // It is only worth it when the preview is a small one.
-            view.backdropImageView.isVisible = item.hdPreviewUrl != null
-            if (item.hdPreviewUrl != null) {
-                picasso
-                    .load(item.thumbnailUrl)
-                    .hardwareOr565()
-                    .noFade()
-                    .into(view.backdropImageView)
-            }
 
             picasso
                 .load(item.previewUrl)
@@ -252,9 +235,15 @@ class ImageViewerPage(
 
             // Picasso loads images synchronously on its own threads,
             // so the call is among the running ones.
-            imageHttpClient.dispatcher.runningCalls()
+            val callsToCancel = imageHttpClient.dispatcher.runningCalls()
                 .filter { it.request().url.toString() == url }
-                .forEach(Call::cancel)
+
+            callsToCancel.forEach(Call::cancel)
+
+            log.debug {
+                "cancelHdRequest(): cancelled_calls:" +
+                        "\ncount=${callsToCancel.size}"
+            }
         }
 
         private fun setHdLoadState(
@@ -279,41 +268,41 @@ class ImageViewerPage(
             }
             view.hdButtonProgress.isVisible = state == HdLoadState.LOADING
 
-            updateHdButtonVisibility(animate = animateButton)
+            updateHdButtonVisibility(isAnimated = animateButton)
         }
 
         override fun setHdButtonVisibilityAllowed(isAllowed: Boolean) {
             isHdButtonVisibilityAllowed = isAllowed
-            updateHdButtonVisibility(animate = true)
+            updateHdButtonVisibility(isAnimated = true)
         }
 
-        private fun updateHdButtonVisibility(animate: Boolean) {
-            val isVisible = isHdButtonVisibilityAllowed
+        private fun updateHdButtonVisibility(isAnimated: Boolean) {
+            val shouldBeVisible = isHdButtonVisibilityAllowed
                     && (hdLoadState == HdLoadState.IDLE || hdLoadState == HdLoadState.LOADING)
 
             with(view.hdButtonLayout) {
-                if (animate) {
-                    clearAnimation()
-                    fadeVisibility(isVisible)
+                // A fade started earlier must be cancelled, otherwise its end action
+                // overrides the visibility set here. clearAnimation alone is not enough,
+                // as the fade is done by a ViewPropertyAnimator.
+                animate().cancel()
+                clearAnimation()
+
+                if (isAnimated && shouldBeVisible != isVisible) {
+                    fadeVisibility(shouldBeVisible)
                 } else {
-                    clearAnimation()
                     alpha = 1f
-                    this.isVisible = isVisible
+                    isVisible = shouldBeVisible
                 }
             }
         }
 
-        override fun applyHdButtonInsets(insets: Rect) {
-            if (appliedHdButtonInsets == insets) {
-                return
-            }
-
-            val previousInsets = appliedHdButtonInsets
-            appliedHdButtonInsets = Rect(insets)
-
+        override fun setHdButtonMargins(
+            topPx: Int,
+            endPx: Int,
+        ) {
             view.hdButtonLayout.updateLayoutParams<MarginLayoutParams> {
-                topMargin += insets.top - (previousInsets?.top ?: 0)
-                rightMargin += insets.right - (previousInsets?.right ?: 0)
+                topMargin = topPx
+                marginEnd = endPx
             }
         }
 
@@ -364,7 +353,6 @@ class ImageViewerPage(
         override fun unbindView(item: ImageViewerPage) {
             cancelHdRequest()
             picasso.cancelRequest(view.photoView)
-            picasso.cancelRequest(view.backdropImageView)
             hdPreviewUrl = null
             setHdLoadState(HdLoadState.UNAVAILABLE, animateButton = false)
         }

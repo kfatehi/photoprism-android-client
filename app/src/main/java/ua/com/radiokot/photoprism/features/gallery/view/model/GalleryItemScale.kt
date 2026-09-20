@@ -12,8 +12,6 @@ enum class GalleryItemScale(
 
     /**
      * Size of the thumbnails loaded for this scale.
-     * Thumbnails of the exact same size are reused by the media viewer,
-     * as they are likely to be cached.
      */
     val thumbnailSizePx: Int,
 ) {

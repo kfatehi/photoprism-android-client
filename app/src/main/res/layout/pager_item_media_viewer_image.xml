@@ -7,16 +7,6 @@
     android:layout_height="match_parent"
     android:focusable="false">
 
-    <!-- Instantly shown cropped thumbnail, which is likely to be cached.
-         It is only a backdrop: tile_ previews are square crops,
-         so they can't be zoomed as the actual content. -->
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/backdrop_image_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:importantForAccessibility="no"
-        android:scaleType="centerCrop" />
-
     <com.github.chrisbanes.photoview.PhotoView
         android:id="@+id/photo_view"
         android:layout_width="match_parent"
@@ -30,14 +20,12 @@
         android:layout_gravity="center"
         android:indeterminate="true" />
 
-    <!-- Margins are programmatically extended with insets -->
+    <!-- Margins are set programmatically, see MediaViewerActivity -->
     <FrameLayout
         android:id="@+id/hd_button_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:layout_marginEnd="16dp"
         android:visibility="gone"
         tools:visibility="visible">
 

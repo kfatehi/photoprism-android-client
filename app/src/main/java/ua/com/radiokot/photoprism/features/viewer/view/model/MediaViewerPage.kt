@@ -45,7 +45,6 @@ sealed class MediaViewerPage(
             canOpenPanoramas: Boolean,
             previewUrlFactory: MediaPreviewUrlFactory,
             progressiveImageLoading: ProgressiveImageLoading? = null,
-            thumbnailSizePx: Int = THUMBNAIL_SIZE_PX,
         ): MediaViewerPage {
             return when {
                 source.media is GalleryMedia.TypeData.Live
@@ -57,7 +56,6 @@ sealed class MediaViewerPage(
                             imageViewSize = imageViewSize,
                             previewUrlFactory = previewUrlFactory,
                             progressiveImageLoading = progressiveImageLoading,
-                            thumbnailSizePx = thumbnailSizePx,
                         )
                     }
 
@@ -152,7 +150,6 @@ sealed class MediaViewerPage(
                         imageViewSize = imageViewSize,
                         previewUrlFactory = previewUrlFactory,
                         progressiveImageLoading = progressiveImageLoading,
-                        thumbnailSizePx = thumbnailSizePx,
                     )
 
                 else ->
@@ -165,7 +162,6 @@ sealed class MediaViewerPage(
             imageViewSize: Size,
             previewUrlFactory: MediaPreviewUrlFactory,
             progressiveImageLoading: ProgressiveImageLoading?,
-            thumbnailSizePx: Int,
         ) = ImageViewerPage(
             previewUrl = previewUrlFactory.getImagePreviewUrl(
                 previewHash = source.hash,
@@ -186,11 +182,9 @@ sealed class MediaViewerPage(
             },
             isHdLoadedAutomatically = progressiveImageLoading?.isAutomatic == true,
             imageViewSize = imageViewSize,
-            // The thumbnail of the very size the grid loads is shown as a backdrop,
-            // so it must be requested with the very same size to hit the cache.
             thumbnailUrl = previewUrlFactory.getThumbnailUrl(
                 thumbnailHash = source.hash,
-                sizePx = thumbnailSizePx,
+                sizePx = THUMBNAIL_SIZE_PX,
             ),
             source = source,
         )

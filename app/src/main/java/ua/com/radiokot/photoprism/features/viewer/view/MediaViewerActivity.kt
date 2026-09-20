@@ -709,8 +709,13 @@ class MediaViewerActivity : BaseActivity() {
 
     private fun setUpProgressiveImage(viewHolder: ImageViewerPage.ViewHolder) {
         viewHolder.itemView.doOnPreDraw {
-            viewHolder.applyHdButtonInsets(
-                FullscreenInsetsCompat.barsAndCutout(window.decorView)
+            val insets = FullscreenInsetsCompat.barsAndCutout(window.decorView)
+            val margin = resources.getDimensionPixelSize(R.dimen.media_viewer_hd_button_margin)
+
+            viewHolder.setHdButtonMargins(
+                // Below the toolbar, which eats all the touch events within its bounds.
+                topPx = view.toolbar.bottom + margin,
+                endPx = margin + max(insets.left, insets.right),
             )
         }
 
