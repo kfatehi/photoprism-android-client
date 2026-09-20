@@ -66,27 +66,10 @@ sealed class GalleryListItem : AbstractItem<ViewHolder>() {
             itemScale: GalleryItemScale,
             previewUrlFactory: MediaPreviewUrlFactory,
         ) : this(
-            thumbnailUrl = when (itemScale) {
-                GalleryItemScale.TINY ->
-                    previewUrlFactory.getThumbnailUrl(
-                        thumbnailHash = source.hash,
-                        sizePx = 100,
-                    )
-
-                GalleryItemScale.SMALL,
-                GalleryItemScale.NORMAL ->
-                    previewUrlFactory.getThumbnailUrl(
-                        thumbnailHash = source.hash,
-                        sizePx = 250,
-                    )
-
-                GalleryItemScale.LARGE,
-                GalleryItemScale.HUGE ->
-                    previewUrlFactory.getThumbnailUrl(
-                        thumbnailHash = source.hash,
-                        sizePx = 500,
-                    )
-            },
+            thumbnailUrl = previewUrlFactory.getThumbnailUrl(
+                thumbnailHash = source.hash,
+                sizePx = itemScale.thumbnailSizePx,
+            ),
             title = source.title,
             mediaTypeIcon =
             // Type icon is visible if it is not an image, unless the scale is tiny.
