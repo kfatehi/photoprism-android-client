@@ -5,6 +5,7 @@ import com.google.common.hash.Hashing
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import ua.com.radiokot.photoprism.extension.kLogger
 import ua.com.radiokot.photoprism.extension.tryOrNull
+import ua.com.radiokot.photoprism.features.gallery.data.model.HdPreviewSize
 import ua.com.radiokot.photoprism.features.gallery.data.model.RawSharingMode
 import ua.com.radiokot.photoprism.features.gallery.view.model.GalleryItemScale
 import ua.com.radiokot.photoprism.features.gallery.data.model.GalleryItemsOrder
@@ -57,6 +58,39 @@ class GalleryPreferencesOnPrefs(
             defaultValue = RawSharingMode.COMPATIBLE_JPEG,
             stringSerializer = RawSharingMode::name,
             stringDeserializer = RawSharingMode::valueOf,
+        )
+
+    override val hdPreviewSize: BehaviorSubject<HdPreviewSize> =
+        stringifyPreferenceSubject(
+            preferences = preferences,
+            key = "${keyPrefix}_hd_preview_size",
+            defaultValue = HdPreviewSize.FIT_2048,
+            stringDeserializer = { valueString ->
+                tryOrNull {
+                    HdPreviewSize.valueOf(valueString)
+                }
+            },
+            stringSerializer = { newValue ->
+                newValue.name.also {
+                    log.debug {
+                        "hdPreviewSize::onNext(): set_value:" +
+                                "\nvalue=$newValue"
+                    }
+                }
+            },
+        )
+
+    override val autoLoadHdOnUnmetered: BehaviorSubject<Boolean> =
+        booleanPreferenceSubject(
+            preferences = preferences,
+            key = "${keyPrefix}_auto_load_hd_unmetered",
+            defaultValue = false,
+            onValuePut = { _, newValue ->
+                log.debug {
+                    "autoLoadHdOnUnmetered::onNext(): set_value:" +
+                            "\nvalue=$newValue"
+                }
+            }
         )
 
     override fun getItemsOrderBySearchQuery(

@@ -314,4 +314,19 @@
     <string name="is_private">Private</string>
     <string name="panorama_view_by_phone_movement">View by phone movement</string>
     <string name="panorama_view_by_gestures">View by gestures</string>
+    <string name="load_hd">Load HD</string>
+    <string name="hd_is_loaded">HD is loaded</string>
+    <string name="hd_preview_size_preference">HD image size</string>
+    <string name="hd_preview_size_preference_summary">Resolution loaded when you tap the HD button</string>
+    <string name="auto_load_hd_on_unmetered">Load HD automatically on Wi‑Fi</string>
+    <string name="auto_load_hd_on_unmetered_explanation">Only when the connection is not metered</string>
+    <string-array name="hd_preview_size_array">
+        <!-- Must be aligned with HdPreviewSize enum -->
+        <item>@string/hd_preview_size_2048</item>
+        <item>@string/hd_preview_size_3840</item>
+        <item>@string/hd_preview_size_4096</item>
+    </string-array>
+    <string name="hd_preview_size_2048" translatable="false">2048 px</string>
+    <string name="hd_preview_size_3840" translatable="false">3840 px</string>
+    <string name="hd_preview_size_4096" translatable="false">4096 px</string>
 </resources>

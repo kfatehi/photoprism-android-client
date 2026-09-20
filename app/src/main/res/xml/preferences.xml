@@ -63,6 +63,21 @@
             app:summary="@string/live_photos_as_images_explanation"
             app:title="@string/live_photos_as_images"
             app:widgetLayout="@layout/preference_material_switch" />
+
+        <ListPreference
+            app:iconSpaceReserved="false"
+            app:key="@string/pk_hd_preview_size"
+            app:persistent="false"
+            app:summary="%1$s"
+            app:title="@string/hd_preview_size_preference" />
+
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            app:key="@string/pk_auto_load_hd_unmetered"
+            app:persistent="false"
+            app:summary="@string/auto_load_hd_on_unmetered_explanation"
+            app:title="@string/auto_load_hd_on_unmetered"
+            app:widgetLayout="@layout/preference_material_switch" />
     </PreferenceCategory>
 
     <PreferenceCategory

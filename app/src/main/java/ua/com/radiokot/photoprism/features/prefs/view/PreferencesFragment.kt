@@ -54,6 +54,7 @@ import ua.com.radiokot.photoprism.features.ext.prefs.view.GalleryExtensionPrefer
 import ua.com.radiokot.photoprism.features.ext.store.view.GalleryExtensionStoreActivity
 import ua.com.radiokot.photoprism.features.gallery.ImportSearchBookmarksUseCaseParams
 import ua.com.radiokot.photoprism.features.gallery.data.model.RawDownloadMode
+import ua.com.radiokot.photoprism.features.gallery.data.model.HdPreviewSize
 import ua.com.radiokot.photoprism.features.gallery.data.model.RawSharingMode
 import ua.com.radiokot.photoprism.features.gallery.data.storage.DownloadPreferences
 import ua.com.radiokot.photoprism.features.gallery.data.storage.GalleryPreferences
@@ -233,6 +234,22 @@ class PreferencesFragment :
                 galleryPreferences.rawSharingMode.onNext(RawSharingMode.valueOf(newValue as String))
                 true
             }
+        }
+
+        with(requirePreference(R.string.pk_hd_preview_size)) {
+            this as ListPreference
+            entries = resources.getStringArray(R.array.hd_preview_size_array)
+            entryValues = HdPreviewSize.entries.map(HdPreviewSize::name).toTypedArray()
+            value = galleryPreferences.hdPreviewSize.value!!.name
+            setOnPreferenceChangeListener { _, newValue ->
+                galleryPreferences.hdPreviewSize.onNext(HdPreviewSize.valueOf(newValue as String))
+                true
+            }
+        }
+
+        with(requirePreference(R.string.pk_auto_load_hd_unmetered)) {
+            this as SwitchPreferenceCompat
+            bindToSubject(galleryPreferences.autoLoadHdOnUnmetered, viewLifecycleOwner)
         }
 
         with(requirePreference(R.string.pk_show_people)) {
